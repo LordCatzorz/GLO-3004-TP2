@@ -1,0 +1,154 @@
+//*******************************************************
+//* File:    Z:/Users/nataw/Documents/LocalTawbi/Cours/SF/Hiv16/TPs/Hiv16/TransactionsBancaires.pd
+//* Author:  Nadia Tawbi
+//* Created: 18:38:57 on Sunday March  2019 UTC
+//*******************************************************
+
+
+
+
+// numéro de compte maximal
+
+const maxNum : int ^= 29999;
+
+class NumCompte ^= those j: int :- 1 <= j <= maxNum   ;
+
+class Type_Jour   ^= those j: int :- 1 <= j <= 31;
+class Type_Mois ^= those m : int :- 1 <= m <= 12; 
+class Type_Annee ^= those a : int :- 1900 <= a <= 20000; 
+
+class Date ^= 
+abstract
+var 
+   jour: Type_Jour,
+   mois : Type_Mois, 
+   annee : Type_Annee; 
+  invariant 
+    ( [mois in set of int {1,3,5,7,8,10,12}] : 1 <= jour & jour <= 31,
+	  [ mois in set of int {4,6,9,11}] : 1 <= jour & jour <= 30, 
+	  [ mois = 2 & (annee % 4 = 0 )&(annee % 100 ~= 0)] : 
+	    1 <= jour <= 29, 
+      [ mois = 2 &  (annee % 400 = 0) ]: 1 <= jour & jour <= 29, 
+	   [ ] : 1 <= jour <= 28
+	);
+  interface 
+   build{!jour:Type_Jour, !mois:Type_Mois,!annee:Type_Annee}
+    pre 
+	 ( [mois in set of int {1,3,5,7,8,10,12}] : 1 <= jour & jour <= 31,
+	  [ mois in set of int {4,6,9,11}] : 1 <= jour & jour <= 30, 
+	  [ mois = 2 & (annee % 4 = 0 )&(annee % 100 ~= 0)] : 
+	    1 <= jour <= 29, 
+      [ mois = 2 &  (annee % 400 = 0) ]: 1 <= jour & jour <= 29, 
+	   [ ] : 1 <= jour <= 28
+	) ;
+    
+  
+     function jour, mois, annee
+end;
+
+
+class DateFermeture ^= Date || void; 
+
+
+final class Compte ^= 
+abstract
+  var 
+	solde : int, 
+	nip : int, 
+	date_ouverture : Date, 
+	date_fermeture : DateFermeture;
+ 
+   
+interface
+ build{!solde:int,!nip:int,!date_ouverture:Date,!date_fermeture : DateFermeture };
+ 
+
+ 
+ schema !modifierSolde(nouveauSolde : int)
+    post solde! = nouveauSolde ;
+
+  schema !modifierNIP(nouveauNIP : int)
+    pre nouveauNIP ~= nip
+    post nip! = nouveauNIP;
+function  solde, nip, date_ouverture, date_fermeture	
+
+
+end; 	
+     
+
+
+final class Banque ^=
+
+abstract
+
+  var comptes : map of (NumCompte -> Compte);
+      
+
+  invariant 
+  
+  // En fait cet invariant n'est pas nécessaire. C'est le type NumCompte 
+  // qui précise cette contrainte. Pas besoin de la répéter. 
+  
+      #comptes <= maxNum
+	  
+	  
+       
+	   
+interface
+
+  function comptes ;
+
+ build{}
+    post comptes! = map  of (NumCompte -> Compte){} ;
+
+  schema !ouvrirCompte(soldeInit : int , numeroCompte : NumCompte, dateOuverture:Date)
+    pre soldeInit > 0 , #comptes < maxNum, 
+		numeroCompte ~in comptes.dom
+    post 
+           comptes!= comptes.append(numeroCompte -> Compte{soldeInit,0, dateOuverture, null}) ;
+		   
+schema !fermerCompte( numeroCompte : NumCompte,dateFermeture:DateFermeture)
+    pre 
+		numeroCompte in comptes.dom, 
+		comptes[numeroCompte].solde = 0, 
+		comptes[numeroCompte].date_fermeture = null, 
+		dateFermeture within Date
+    post 
+           comptes!= 
+comptes.remove(numeroCompte).append(numeroCompte -> Compte{0,comptes[numeroCompte].nip,
+comptes[numeroCompte].date_ouverture, dateFermeture}) ;
+		   
+ schema !supprimerCompte(compteAsupprimer : NumCompte, dateDemande:Date)
+    pre compteAsupprimer in comptes.dom, comptes[compteAsupprimer].solde = 0,
+	    comptes[compteAsupprimer].date_fermeture within Date,
+	    ( (let dateFermeture ^= (comptes[compteAsupprimer].date_fermeture is Date);
+		   (dateDemande.annee > dateFermeture.annee +2) | 
+		    (dateDemande.annee = dateFermeture.annee+2 & 
+			  dateDemande.mois > dateFermeture.mois) | 
+			(dateDemande.annee = dateFermeture.annee+2 & 
+			  dateDemande.mois = dateFermeture.mois &
+			  dateDemande.jour > dateFermeture.jour)
+			)
+		)
+    post 
+           comptes!= comptes.remove(compteAsupprimer) ;
+
+  schema !changer_Solde(numeroCompte : NumCompte , nouveauSolde : int)
+	pre  numeroCompte in comptes.dom
+    post 
+	 comptes[numeroCompte]!modifierSolde(nouveauSolde);
+
+
+  schema !changer_NIP(numeroCompte :NumCompte , nouveauNIP : int)
+    pre numeroCompte in comptes.dom, nouveauNIP ~= comptes[numeroCompte].nip
+    post 
+	  comptes[numeroCompte]!modifierNIP(nouveauNIP);
+  
+
+end;
+
+
+
+
+
+// End

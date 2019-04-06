@@ -176,7 +176,7 @@ interface
 	schema !fermerCompte(numeroCompte: NumCompte, dateFermeture: DateFermeture)
 	pre
 		numeroCompte in comptes.dom,
-		comptes[numeroCompte].solde = 0,
+		comptes[numeroCompte].solde <= partQualification,
 		comptes[numeroCompte].date_fermeture = null,
 		dateFermeture within Date
 	post

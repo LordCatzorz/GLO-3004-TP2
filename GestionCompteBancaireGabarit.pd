@@ -98,12 +98,16 @@ interface
 	// end-viderFerme
 	
 	schema !deposerLiquide(montant: Nat)
-	pre
-		montant + depot_liquide_cet_exercice <= maxDepotLiquideParExercice
 	post
 		!deposer(montant),
-		depot_liquide_cet_exercice! = depot_liquide_cet_exercice + montant;
+		!changer_depotLiquide(depot_liquide_cet_exercice + montant);
 	// end-deposerLiquide
+	
+	schema !changer_depotLiquide(montant: Nat)
+	pre
+		montant <= maxDepotLiquideParExercice
+	post
+		depot_liquide_cet_exercice! = montant;
 		
 	schema !modifierNIP(nouveauNIP: int)
 	pre

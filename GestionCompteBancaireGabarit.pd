@@ -8,10 +8,10 @@
 // numéro de compte maximal
 const maxNum: int ^= 29999;
 
+class NumCompte ^= those j: int :- 1 <= j <= maxNum;
+
 // Naturel de 0 à infini+
 class Nat ^= those x: int :- 0 <= x;
-
-class NumCompte ^= those j: int :- 1 <= j <= maxNum;
 
 class Type_Jour ^= those j: int :- 1 <= j <= 31;
 class Type_Mois ^= those m: int :- 1 <= m <= 12;
@@ -126,7 +126,7 @@ interface
 		nip! = nouveauNIP;
 	//end-modifierNIP
 
-	function solde, nip, date_ouverture, date_fermeture	
+	function solde, nip, date_ouverture, date_fermeture, depot_liquide_cet_exercice	
 end;
 
 const jourDuBilan: int ^= 3;
@@ -213,12 +213,49 @@ interface
 		comptes[compteAvider]!viderFerme;
 	//end-viderCompteFerme
 
-	schema !changer_Solde(numeroCompte: NumCompte, nouveauSolde: int)
+	schema !retirerDuCompte(compteOuRetirer: NumCompte, montant: Nat)
 	pre
-		numeroCompte in comptes.dom
+		compteOuRetirer in comptes.dom,
+		comptes[compteOuRetirer].solde - montant >= partQualification,
+		comptes[compteOuRetirer].date_fermeture within void
 	post
-		comptes[numeroCompte]!modifierSolde(nouveauSolde);
-	//end-changer_Solde
+		sortiesEffectues! = sortiesEffectues + montant,
+		soldeGlobal! = soldeGlobal - montant,
+		comptes[compteOuRetirer]!retirer(montant);
+	//end-retirerDuCompte
+	
+	schema !deposerDansCompte(compteOuDeposer: NumCompte, montant: Nat)
+	pre
+		compteOuDeposer in comptes.dom,
+		comptes[compteOuDeposer].date_fermeture within void
+	post
+		entreesEffectues! = entreesEffectues + montant,
+		soldeGlobal! = soldeGlobal + montant,
+		comptes[compteOuDeposer]!deposer(montant);
+	//end-deposerDansCompte
+	
+	schema !deposerLiquideDansCompte(compteOuDeposer: NumCompte, montant: Nat)
+	pre
+		compteOuDeposer in comptes.dom,
+		comptes[compteOuDeposer].date_fermeture within void,
+		comptes[compteOuDeposer].depot_liquide_cet_exercice + montant <= maxDepotLiquideParExercice
+	post
+		entreesEffectues! = entreesEffectues + montant,
+		soldeGlobal! = soldeGlobal + montant,
+		comptes[compteOuDeposer]!deposerLiquide(montant);
+	//end-deposerLiquideDansCompte
+	
+	schema !virerEntreCompte(compteOrigine: NumCompte, compteDestination: NumCompte, montant: Nat)
+	pre
+		compteOrigine in comptes.dom,
+		compteDestination in comptes.dom,
+		comptes[compteOrigine].date_fermeture within void,
+		comptes[compteDestination].date_fermeture within void,
+		comptes[compteOrigine].solde - montant >= partQualification
+	post
+		!retirerDuCompte(compteOrigine, montant) then
+		!deposerDansCompte(compteDestination, montant);
+	//end-virerEntreCompte
 
 	schema !changer_NIP(numeroCompte: NumCompte, nouveauNIP: int)
 	pre

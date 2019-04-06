@@ -59,12 +59,12 @@ abstract
 		nip: int,
 		date_ouverture: Date,
 		date_fermeture: DateFermeture,
-		depot_liquide_cet_exercice: int;
+		depot_liquide_cet_exercice: Nat;
 	invariant
 		depot_liquide_cet_exercice <= maxDepotLiquideParExercice,
 		(
-			[date_fermeture within Date] : solde >= partQualification,
-			[] : true
+			[date_fermeture within void] : solde >= partQualification,
+			[date_fermeture within Date] : solde = 0
 		)
 interface
 	build{
@@ -72,34 +72,43 @@ interface
 		!nip: int, 
 		!date_ouverture: Date, 
 		!date_fermeture: DateFermeture,
-		!depot_liquide_cet_exercice: int};
+		!depot_liquide_cet_exercice: Nat}
+	pre
+		(
+			[date_fermeture within void] : solde >= partQualification,
+			[date_fermeture within Date] : solde = 0
+		),
+		depot_liquide_cet_exercice <= maxDepotLiquideParExercice;
 	//end-build
 
 	schema !retirer(montant: Nat)
 	pre
 		solde - montant >= partQualification,
-		date_fermeture within Date
+		date_fermeture within void
 	post
 		solde! = solde - montant;
 	//end-retirer
 	
 	schema !deposer(montant: Nat)
 	pre
-		date_fermeture within Date
+		date_fermeture within void
 	post
 		solde! = solde + montant;
 	//end-deposer
 	
 	schema !viderFerme
 	pre
-		date_fermeture within void
+		date_fermeture within Date
 	post
 		solde! = 0;
 	// end-viderFerme
 	
 	schema !deposerLiquide(montant: Nat)
+	pre
+		date_fermeture within void,
+		depot_liquide_cet_exercice + montant <= maxDepotLiquideParExercice
 	post
-		!deposer(montant),
+		!deposer(montant) then 
 		!changer_depotLiquide(depot_liquide_cet_exercice + montant);
 	// end-deposerLiquide
 	
@@ -155,11 +164,13 @@ interface
 
 	schema !ouvrirCompte(soldeInit: int, numeroCompte: NumCompte, dateOuverture: Date)
 	pre
-		soldeInit > 0,
+		soldeInit >= partQualification,
 		#comptes < maxNum,
 		numeroCompte ~in comptes.dom
 	post
-		comptes! = comptes.append(numeroCompte -> Compte{soldeInit, 0, dateOuverture, null});
+		entreesEffectues! = entreesEffectues + soldeInit,
+		soldeGlobal! = soldeGlobal + soldeInit,
+		comptes! = comptes.append(numeroCompte -> Compte{soldeInit, 0, dateOuverture, null, 0});
 	//end-ouvrirCompte
 
 	schema !fermerCompte(numeroCompte: NumCompte, dateFermeture: DateFermeture)
@@ -171,7 +182,7 @@ interface
 	post
 		comptes! =
 			comptes.remove(numeroCompte).append(numeroCompte ->
-				Compte{0, comptes[numeroCompte].nip, comptes[numeroCompte].date_ouverture, dateFermeture});
+				Compte{0, comptes[numeroCompte].nip, comptes[numeroCompte].date_ouverture, dateFermeture, 0});
 	//end-fermerCompte
 
 	schema !supprimerCompte(compteAsupprimer: NumCompte, dateDemande: Date)

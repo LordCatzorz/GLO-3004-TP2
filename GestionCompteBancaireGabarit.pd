@@ -64,7 +64,13 @@ abstract
 			[] : true
 		)
 interface
-	build{!solde: int, !nip: int, !date_ouverture: Date, !date_fermeture: DateFermeture};
+	build{
+		!solde: int, 
+		!nip: int, 
+		!date_ouverture: Date, 
+		!date_fermeture: DateFermeture,
+		!depot_liquid_cet_exercice: int};
+	//end-build
 	
 	schema !modifierSolde(nouveauSolde: int)
 	post

@@ -10,9 +10,6 @@ const maxNum: int ^= 29999;
 
 class NumCompte ^= those j: int :- 1 <= j <= maxNum;
 
-// Naturel de 0 à infini+
-class Nat ^= those x: int :- 0 <= x;
-
 class Type_Jour ^= those j: int :- 1 <= j <= 31;
 class Type_Mois ^= those m: int :- 1 <= m <= 12;
 class Type_Annee ^= those a: int :- 1900 <= a <= 20000;
@@ -59,7 +56,7 @@ abstract
 		nip: int,
 		date_ouverture: Date,
 		date_fermeture: DateFermeture,
-		depot_liquide_cet_exercice: Nat;
+		depot_liquide_cet_exercice: nat;
 	invariant
 		depot_liquide_cet_exercice <= maxDepotLiquideParExercice,
 		(
@@ -72,7 +69,7 @@ interface
 		!nip: int, 
 		!date_ouverture: Date, 
 		!date_fermeture: DateFermeture,
-		!depot_liquide_cet_exercice: Nat}
+		!depot_liquide_cet_exercice: nat}
 	pre
 		(
 			[date_fermeture within void] : solde >= partQualification,
@@ -81,7 +78,7 @@ interface
 		depot_liquide_cet_exercice <= maxDepotLiquideParExercice;
 	//end-build
 
-	schema !retirer(montant: Nat)
+	schema !retirer(montant: nat)
 	pre
 		solde - montant >= partQualification,
 		date_fermeture within void
@@ -89,7 +86,7 @@ interface
 		solde! = solde - montant;
 	//end-retirer
 	
-	schema !deposer(montant: Nat)
+	schema !deposer(montant: nat)
 	pre
 		date_fermeture within void
 	post
@@ -103,7 +100,7 @@ interface
 		solde! = 0;
 	// end-viderFerme
 	
-	schema !deposerLiquide(montant: Nat)
+	schema !deposerLiquide(montant: nat)
 	pre
 		date_fermeture within void,
 		depot_liquide_cet_exercice + montant <= maxDepotLiquideParExercice
@@ -112,7 +109,7 @@ interface
 		!changer_depotLiquide(depot_liquide_cet_exercice + montant);
 	// end-deposerLiquide
 	
-	schema !changer_depotLiquide(montant: Nat)
+	schema !changer_depotLiquide(montant: nat)
 	pre
 		montant <= maxDepotLiquideParExercice
 	post
@@ -213,7 +210,7 @@ interface
 		comptes[compteAvider]!viderFerme;
 	//end-viderCompteFerme
 
-	schema !retirerDuCompte(compteOuRetirer: NumCompte, montant: Nat)
+	schema !retirerDuCompte(compteOuRetirer: NumCompte, montant: nat)
 	pre
 		compteOuRetirer in comptes.dom,
 		comptes[compteOuRetirer].solde - montant >= partQualification,
@@ -224,7 +221,7 @@ interface
 		comptes[compteOuRetirer]!retirer(montant);
 	//end-retirerDuCompte
 	
-	schema !deposerDansCompte(compteOuDeposer: NumCompte, montant: Nat)
+	schema !deposerDansCompte(compteOuDeposer: NumCompte, montant: nat)
 	pre
 		compteOuDeposer in comptes.dom,
 		comptes[compteOuDeposer].date_fermeture within void
@@ -234,7 +231,7 @@ interface
 		comptes[compteOuDeposer]!deposer(montant);
 	//end-deposerDansCompte
 	
-	schema !deposerLiquideDansCompte(compteOuDeposer: NumCompte, montant: Nat)
+	schema !deposerLiquideDansCompte(compteOuDeposer: NumCompte, montant: nat)
 	pre
 		compteOuDeposer in comptes.dom,
 		comptes[compteOuDeposer].date_fermeture within void,
@@ -245,7 +242,7 @@ interface
 		comptes[compteOuDeposer]!deposerLiquide(montant);
 	//end-deposerLiquideDansCompte
 	
-	schema !virerEntreCompte(compteOrigine: NumCompte, compteDestination: NumCompte, montant: Nat)
+	schema !virerEntreCompte(compteOrigine: NumCompte, compteDestination: NumCompte, montant: nat)
 	pre
 		compteOrigine in comptes.dom,
 		compteDestination in comptes.dom,

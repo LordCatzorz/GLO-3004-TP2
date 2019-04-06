@@ -8,6 +8,9 @@
 // numéro de compte maximal
 const maxNum: int ^= 29999;
 
+// Naturel de 0 à infini+
+class Nat ^= those x: int :- 0 <= x;
+
 class NumCompte ^= those j: int :- 1 <= j <= maxNum;
 
 class Type_Jour ^= those j: int :- 1 <= j <= 31;
@@ -56,9 +59,9 @@ abstract
 		nip: int,
 		date_ouverture: Date,
 		date_fermeture: DateFermeture,
-		depot_liquid_cet_exercice: int;
+		depot_liquide_cet_exercice: int;
 	invariant
-		depot_liquid_cet_exercice <= maxDepotLiquideParExercice,
+		depot_liquide_cet_exercice <= maxDepotLiquideParExercice,
 		(
 			[date_fermeture within Date] : solde >= partQualification,
 			[] : true
@@ -69,14 +72,39 @@ interface
 		!nip: int, 
 		!date_ouverture: Date, 
 		!date_fermeture: DateFermeture,
-		!depot_liquid_cet_exercice: int};
+		!depot_liquide_cet_exercice: int};
 	//end-build
-	
-	schema !modifierSolde(nouveauSolde: int)
-	post
-		solde! = nouveauSolde;
-	//end-modifierSolde
 
+	schema !retirer(montant: Nat)
+	pre
+		solde - montant >= partQualification,
+		date_fermeture within Date
+	post
+		solde! = solde - montant;
+	//end-retirer
+	
+	schema !deposer(montant: Nat)
+	pre
+		date_fermeture within Date
+	post
+		solde! = solde + montant;
+	//end-deposer
+	
+	schema !viderFerme
+	pre
+		date_fermeture within void
+	post
+		solde! = 0;
+	// end-viderFerme
+	
+	schema !deposerLiquide(montant: Nat)
+	pre
+		montant + depot_liquide_cet_exercice <= maxDepotLiquideParExercice
+	post
+		!deposer(montant),
+		depot_liquide_cet_exercice! = depot_liquide_cet_exercice + montant;
+	// end-deposerLiquide
+		
 	schema !modifierNIP(nouveauNIP: int)
 	pre
 		nouveauNIP ~= nip

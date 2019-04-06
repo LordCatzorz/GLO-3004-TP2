@@ -6,7 +6,6 @@
 
 
 // numéro de compte maximal
-
 const maxNum: int ^= 29999;
 
 class NumCompte ^= those j: int :- 1 <= j <= maxNum;

@@ -108,6 +108,7 @@ interface
 		montant <= maxDepotLiquideParExercice
 	post
 		depot_liquide_cet_exercice! = montant;
+	// end-changer_depotLiquide
 		
 	schema !modifierNIP(nouveauNIP: int)
 	pre

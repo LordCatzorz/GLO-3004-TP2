@@ -46,13 +46,18 @@ end;
 
 class DateFermeture ^= Date || void;
 
+const maxDepotLiquideParExercice: int ^= 10000;
+
 final class Compte ^=
 abstract
 	var
 		solde: int,
 		nip: int,
 		date_ouverture: Date,
-		date_fermeture: DateFermeture;
+		date_fermeture: DateFermeture,
+		depot_liquid_cet_exercice: int;
+	invariant
+		depot_liquid_cet_exercice <= maxDepotLiquideParExercice
 interface
 	build{!solde: int, !nip: int, !date_ouverture: Date, !date_fermeture: DateFermeture};
 	

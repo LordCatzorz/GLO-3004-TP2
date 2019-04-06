@@ -120,15 +120,23 @@ interface
 	function solde, nip, date_ouverture, date_fermeture	
 end;
 
+const jourDuBilan: int ^= 3;
+const moisDuBilan: int ^= 3;
 
 final class Banque ^=
 abstract
 	var
-		comptes: map of (NumCompte -> Compte);
+		comptes: map of (NumCompte -> Compte),
+		soldeGlobal: int,
+		soldeVerification: int,
+		entreesEffectues: int,
+		sortiesEffectues: int,
+		gain: int,
+		dateBilan: Date;
 	invariant
-		// En fait cet invariant n'est pas nécessaire. C'est le type NumCompte
-		// qui précise cette contrainte. Pas besoin de la répéter.
-		#comptes <= maxNum
+		soldeGlobal = soldeVerification + entreesEffectues - sortiesEffectues,
+		dateBilan.jour = jourDuBilan,
+		dateBilan.mois = moisDuBilan		
 interface
 	function comptes;
 

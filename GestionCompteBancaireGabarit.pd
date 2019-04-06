@@ -203,6 +203,16 @@ interface
 		comptes! = comptes.remove(compteAsupprimer);
 	//end-supprimerCompte
 
+	schema !viderCompteFerme(compteAvider: NumCompte)
+	pre
+		compteAvider in comptes.dom,
+		comptes[compteAvider].date_fermeture within Date
+	post
+		sortiesEffectues! = sortiesEffectues + comptes[compteAvider].solde,
+		soldeGlobal! = soldeGlobal + comptes[compteAvider].solde,
+		comptes[compteAvider]!viderFerme;
+	//end-viderCompteFerme
+
 	schema !changer_Solde(numeroCompte: NumCompte, nouveauSolde: int)
 	pre
 		numeroCompte in comptes.dom

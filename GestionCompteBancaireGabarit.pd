@@ -273,6 +273,19 @@ interface
 		entreesEffectues! = 0,
 		sortiesEffectues! = 0;
 	//end-verifierBilan
+	
+	schema !virerInterBanques(numeroCompte: NumCompte, montant: nat)
+	pre
+		numeroCompte in comptes.dom,
+		comptes[numeroCompte].date_fermeture within void,
+		comptes[numeroCompte].solde - montant >= partQualification
+	post
+		!retirerDuCompte(numeroCompte, montant)
+		// frais et gain???
+		;
+	//end-verificationBilan
+		
+		
 end;
 
 // End

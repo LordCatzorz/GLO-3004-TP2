@@ -253,6 +253,18 @@ interface
 		!retirerDuCompte(compteOrigine, montant) then
 		!deposerDansCompte(compteDestination, montant);
 	//end-virerEntreCompte
+	
+	schema !verifierBilan(dateJour: Date)
+	pre
+		dateJour = dateBilan,
+		dateBilan.annee <20000,
+		(+ over (for i::comptes.dom yield comptes[i].solde)) = soldeGlobal
+	post
+		dateBilan! = Date{dateBilan.jour, dateBilan.mois, dateBilan.annee + 1},
+		soldeVerification! = soldeGlobal,
+		entreesEffectues! = 0,
+		sortiesEffectues! = 0;
+	//end-verifierBilan
 
 	schema !changer_NIP(numeroCompte: NumCompte, nouveauNIP: int)
 	pre

@@ -253,6 +253,14 @@ interface
 		!retirerDuCompte(compteOrigine, montant) then
 		!deposerDansCompte(compteDestination, montant);
 	//end-virerEntreCompte
+
+	schema !changer_NIP(numeroCompte: NumCompte, nouveauNIP: int)
+	pre
+		numeroCompte in comptes.dom,
+		nouveauNIP ~= comptes[numeroCompte].nip
+	post
+		comptes[numeroCompte]!modifierNIP(nouveauNIP);
+	//end-changer_NIP
 	
 	schema !verifierBilan(dateJour: Date)
 	pre
@@ -265,14 +273,6 @@ interface
 		entreesEffectues! = 0,
 		sortiesEffectues! = 0;
 	//end-verifierBilan
-
-	schema !changer_NIP(numeroCompte: NumCompte, nouveauNIP: int)
-	pre
-		numeroCompte in comptes.dom,
-		nouveauNIP ~= comptes[numeroCompte].nip
-	post
-		comptes[numeroCompte]!modifierNIP(nouveauNIP);
-	//end-changer_NIP
 end;
 
 // End

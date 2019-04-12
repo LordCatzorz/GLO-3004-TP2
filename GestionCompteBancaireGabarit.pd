@@ -85,21 +85,21 @@ interface
 	post
 		solde! = solde - montant;
 	//end-retirer
-	
+
 	schema !deposer(montant: nat)
 	pre
 		date_fermeture within void
 	post
 		solde! = solde + montant;
 	//end-deposer
-	
+
 	schema !viderFerme
 	pre
 		date_fermeture within Date
 	post
 		solde! = 0;
 	// end-viderFerme
-	
+
 	schema !deposerLiquide(montant: nat)
 	pre
 		date_fermeture within void,
@@ -108,14 +108,14 @@ interface
 		!deposer(montant) then 
 		!changer_depotLiquide(depot_liquide_cet_exercice + montant);
 	// end-deposerLiquide
-	
+
 	schema !changer_depotLiquide(montant: nat)
 	pre
 		montant <= maxDepotLiquideParExercice
 	post
 		depot_liquide_cet_exercice! = montant;
 	// end-changer_depotLiquide
-		
+
 	schema !modifierNIP(nouveauNIP: int)
 	pre
 		nouveauNIP ~= nip
@@ -123,7 +123,7 @@ interface
 		nip! = nouveauNIP;
 	//end-modifierNIP
 
-	function solde, nip, date_ouverture, date_fermeture, depot_liquide_cet_exercice	
+	function solde, nip, date_ouverture, date_fermeture, depot_liquide_cet_exercice
 end;
 
 const jourDuBilan: int ^= 3;
@@ -144,7 +144,7 @@ abstract
 	invariant
 		soldeGlobal = soldeVerification + entreesEffectues - sortiesEffectues,
 		dateBilan.jour = jourDuBilan,
-		dateBilan.mois = moisDuBilan		
+		dateBilan.mois = moisDuBilan
 interface
 	function comptes;
 
@@ -222,7 +222,7 @@ interface
 		soldeGlobal! = soldeGlobal - montant,
 		comptes[compteOuRetirer]!retirer(montant);
 	//end-retirerDuCompte
-	
+
 	schema !deposerDansCompte(compteOuDeposer: NumCompte, montant: nat)
 	pre
 		compteOuDeposer in comptes.dom,
@@ -232,7 +232,7 @@ interface
 		soldeGlobal! = soldeGlobal + montant,
 		comptes[compteOuDeposer]!deposer(montant);
 	//end-deposerDansCompte
-	
+
 	schema !deposerLiquideDansCompte(compteOuDeposer: NumCompte, montant: nat)
 	pre
 		compteOuDeposer in comptes.dom,
@@ -243,7 +243,7 @@ interface
 		soldeGlobal! = soldeGlobal + montant,
 		comptes[compteOuDeposer]!deposerLiquide(montant);
 	//end-deposerLiquideDansCompte
-	
+
 	schema !virerEntreCompte(compteOrigine: NumCompte, compteDestination: NumCompte, montant: nat)
 	pre
 		compteOrigine in comptes.dom,
@@ -263,7 +263,7 @@ interface
 	post
 		comptes[numeroCompte]!modifierNIP(nouveauNIP);
 	//end-changer_NIP
-	
+
 	schema !verifierBilan(dateJour: Date)
 	pre
 		dateJour = dateBilan,
@@ -275,7 +275,7 @@ interface
 		entreesEffectues! = 0,
 		sortiesEffectues! = 0;
 	//end-verifierBilan
-	
+
 	schema !virerInterBanques(numeroCompte: NumCompte, montant: nat)
 	pre
 		numeroCompte in comptes.dom,
@@ -285,8 +285,17 @@ interface
 		!retirerDuCompte(numeroCompte, montant + fraisVirementInterbanque) then
 		gain! = gain + fraisVirementInterbanque;
 	//end-virerInterBanques
-		
-		
+
+	schema !deposerInterBanques(numeroCompte: NumCompte, montant: nat)
+	pre
+		numeroCompte in comptes.dom,
+		comptes[numeroCompte].date_fermeture within void,
+		montant >= fraisDepotInterbanque
+	post
+		!deposerDansCompte(numeroCompte, montant - fraisDepotInterbanque) then
+		gain! = gain + fraisDepotInterbanque;
+	//end-deposerInterBanques
+
 end;
 
 // End

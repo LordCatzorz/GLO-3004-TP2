@@ -128,6 +128,8 @@ end;
 
 const jourDuBilan: int ^= 3;
 const moisDuBilan: int ^= 3;
+const fraisVirementInterbanque ^= 5;
+const fraisDepotInterbanque ^=5;
 
 final class Banque ^=
 abstract
@@ -278,12 +280,11 @@ interface
 	pre
 		numeroCompte in comptes.dom,
 		comptes[numeroCompte].date_fermeture within void,
-		comptes[numeroCompte].solde - montant >= partQualification
+		comptes[numeroCompte].solde - montant - fraisVirementInterbanque >= partQualification
 	post
-		!retirerDuCompte(numeroCompte, montant)
-		// frais et gain???
-		;
-	//end-verificationBilan
+		!retirerDuCompte(numeroCompte, montant + fraisVirementInterbanque) then
+		gain! = gain + fraisVirementInterbanque;
+	//end-virerInterBanques
 		
 		
 end;

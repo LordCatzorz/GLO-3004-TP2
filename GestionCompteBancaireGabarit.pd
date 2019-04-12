@@ -321,6 +321,14 @@ interface
 		depotsComptes! = 0,
 		frais! = 0;
 	//end-build
+	
+	schema !inscrireBanque(banqueNum: NumB, nouvelleBanque: Banque)
+	pre
+		nouvelleBanque ~in banques.ran,
+		banqueNum ~in banques.dom
+	post
+		banques! = banques.append(banqueNum -> nouvelleBanque);
+	//end-inscrireBanque
 end;
 		
 

@@ -205,7 +205,15 @@ interface
 	post
 		entreesEffectues! = entreesEffectues + soldeInit,
 		soldeGlobal! = soldeGlobal + soldeInit,
-		comptes! = comptes.append(numeroCompte -> Compte{soldeInit, 0, dateOuverture, null, 0});
+		comptes! = comptes.append(numeroCompte -> Compte{soldeInit, 0, dateOuverture, null, 0})
+	assert
+		#comptes' = #comptes + 1,
+		soldeGlobal' = soldeGlobal + soldeInit,
+		soldeVerification' = soldeVerification,
+		entreesEffectues' = entreesEffectues + soldeInit,
+		sortiesEffectues' = sortiesEffectues,
+		gain' = gain,
+		dateBilan' = dateBilan;
 	//end-ouvrirCompte
 
 	schema !fermerCompte(numeroCompte: NumCompte, dateFermeture: DateFermeture)

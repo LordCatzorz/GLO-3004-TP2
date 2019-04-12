@@ -295,7 +295,6 @@ interface
 		!deposerDansCompte(numeroCompte, montant - fraisDepotInterbanque) then
 		gain! = gain + fraisDepotInterbanque;
 	//end-deposerInterBanques
-
 end;
 
 
@@ -313,7 +312,7 @@ abstract
 		sortiesComptes = depotsComptes + frais
 interface
 	function banques, sortiesComptes, depotsComptes, frais;
-	
+
 	build{}
 	post
 		banques! = map of (NumB -> Banque){},
@@ -321,7 +320,7 @@ interface
 		depotsComptes! = 0,
 		frais! = 0;
 	//end-build
-	
+
 	schema !inscrireBanque(banqueNum: NumB, nouvelleBanque: Banque)
 	pre
 		nouvelleBanque ~in banques.ran,
@@ -349,6 +348,5 @@ interface
 		banques[banqueDest]!deposerInterBanques(compteDest, montant);
 	//end-virer
 end;
-		
 
 // End

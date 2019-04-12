@@ -298,4 +298,30 @@ interface
 
 end;
 
+
+const maxB: nat ^= 1000;
+class NumB ^= those j: nat :- 1 <= j <= maxB;
+
+final class Transactions ^=
+abstract
+	var
+		banques: map of (NumB -> Banque),
+		sortiesComptes: nat,
+		depotsComptes: nat,
+		frais: nat;
+	invariant
+		sortiesComptes = depotsComptes + frais
+interface
+	function banques, sortiesComptes, depotsComptes, frais;
+	
+	build{}
+	post
+		banques! = map of (NumB -> Banque){},
+		sortiesComptes! = 0,
+		depotsComptes! = 0,
+		frais! = 0;
+	//end-build
+end;
+		
+
 // End

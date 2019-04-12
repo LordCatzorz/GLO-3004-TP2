@@ -329,6 +329,25 @@ interface
 	post
 		banques! = banques.append(banqueNum -> nouvelleBanque);
 	//end-inscrireBanque
+
+	schema !virer(banqueSource: NumB, compteSource: NumCompte, banqueDest: NumB, compteDest: NumCompte, montant: nat)
+	pre
+		montant >= fraisDepotInterbanque,
+		banqueSource in banques.dom,
+		banqueDest in banques.dom,
+		banqueSource ~= banqueDest,
+		compteSource in banques[banqueSource].comptes,
+		compteDest in banques[banqueDest].comptes,
+		banques[banqueSource].comptes[compteSource].date_fermeture within void,
+		banques[banqueDest].comptes[compteDest].date_fermeture within void,
+		banques[banqueSource].comptes[compteSource].solde - montant - fraisVirementInterbanque > partQualification
+	post
+		sortiesComptes! = sortiesComptes + montant + fraisVirementInterbanque,
+		depotsComptes! = depotsComptes + montant - fraisDepotInterbanque,
+		frais! = frais + fraisVirementInterbanque + fraisDepotInterbanque,
+		banques[banqueSource]!virerInterBanques(compteSource, montant),
+		banques[banqueDest]!deposerInterBanques(compteDest, montant);
+	//end-virer
 end;
 		
 

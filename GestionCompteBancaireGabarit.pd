@@ -291,7 +291,15 @@ interface
 	post
 		sortiesEffectues! = sortiesEffectues + montant,
 		soldeGlobal! = soldeGlobal - montant,
-		comptes[compteOuRetirer]!retirer(montant);
+		comptes[compteOuRetirer]!retirer(montant)
+	assert
+		#comptes' = #comptes,
+		compteOuRetirer in comptes'.dom,
+		comptes'[compteOuRetirer].solde = comptes[compteOuRetirer].solde - montant,
+		soldeVerification' = soldeVerification,
+		entreesEffectues' = entreesEffectues,
+		gain' = gain,
+		dateBilan' = dateBilan;
 	//end-retirerDuCompte
 
 	schema !deposerDansCompte(compteOuDeposer: NumCompte, montant: nat)
@@ -301,7 +309,15 @@ interface
 	post
 		entreesEffectues! = entreesEffectues + montant,
 		soldeGlobal! = soldeGlobal + montant,
-		comptes[compteOuDeposer]!deposer(montant);
+		comptes[compteOuDeposer]!deposer(montant)
+	assert
+		#comptes' = #comptes,
+		compteOuDeposer in comptes'.dom,
+		comptes'[compteOuDeposer].solde = comptes[compteOuDeposer].solde + montant,
+		soldeVerification' = soldeVerification,
+		sortiesEffectues' = sortiesEffectues,
+		gain' = gain,
+		dateBilan' = dateBilan;
 	//end-deposerDansCompte
 
 	schema !deposerLiquideDansCompte(compteOuDeposer: NumCompte, montant: nat)

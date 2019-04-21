@@ -255,7 +255,14 @@ interface
 	post
 		comptes! = comptes.remove(compteAsupprimer)
 	assert
-		#comptes' = #comptes -1;
+		#comptes' = #comptes -1,
+		compteAsupprimer ~in comptes'.dom,
+		soldeGlobal' = soldeGlobal,
+		soldeVerification' = soldeVerification,
+		entreesEffectues' = entreesEffectues,
+		sortiesEffectues' = sortiesEffectues,
+		gain' = gain,
+		dateBilan' = dateBilan;
 	//end-supprimerCompte
 
 	schema !viderCompteFerme(compteAvider: NumCompte)
@@ -265,7 +272,15 @@ interface
 	post
 		sortiesEffectues! = sortiesEffectues + comptes[compteAvider].solde,
 		soldeGlobal! = soldeGlobal + comptes[compteAvider].solde,
-		comptes[compteAvider]!viderFerme;
+		comptes[compteAvider]!viderFerme
+	assert
+		#comptes' = #comptes,
+		compteAvider in comptes'.dom,
+		comptes'[compteAvider].solde = 0,
+		soldeVerification' = soldeVerification,
+		entreesEffectues' = entreesEffectues,
+		gain' = gain,
+		dateBilan' = dateBilan;
 	//end-viderCompteFerme
 
 	schema !retirerDuCompte(compteOuRetirer: NumCompte, montant: nat)

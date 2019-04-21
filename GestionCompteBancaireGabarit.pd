@@ -396,9 +396,9 @@ interface
 		soldeVerification! = soldeGlobal,
 		entreesEffectues! = 0,
 		sortiesEffectues! = 0,
-		forall x::comptes.dom :- comptes[x]!changer_depotLiquide(0);
-	//assert
-	//	forall x::comptes'.ran :- x.depot_liquide_cet_exercice = 0;
+		forall x::comptes.dom :- comptes[x]!changer_depotLiquide(0)
+	assert
+		#comptes' = #comptes;
 	//end-verifierBilan
 
 	schema !virerInterBanques(numeroCompte: NumCompte, montant: nat)

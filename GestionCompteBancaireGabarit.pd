@@ -225,7 +225,17 @@ interface
 	post
 		comptes! =
 			comptes.remove(numeroCompte).append(numeroCompte ->
-				Compte{0, comptes[numeroCompte].nip, comptes[numeroCompte].date_ouverture, dateFermeture, 0});
+				Compte{0, comptes[numeroCompte].nip, comptes[numeroCompte].date_ouverture, dateFermeture, 0})
+	assert
+		#comptes' = #comptes,
+		numeroCompte in comptes'.dom,
+		comptes'[numeroCompte].date_fermeture within Date,
+		soldeGlobal' = soldeGlobal,
+		soldeVerification' = soldeVerification,
+		entreesEffectues' = entreesEffectues,
+		sortiesEffectues' = sortiesEffectues,
+		gain' = gain,
+		dateBilan' = dateBilan;
 	//end-fermerCompte
 
 	schema !supprimerCompte(compteAsupprimer: NumCompte, dateDemande: Date)
@@ -243,7 +253,9 @@ interface
 				dateDemande.jour > dateFermeture.jour)
 		)
 	post
-		comptes! = comptes.remove(compteAsupprimer);
+		comptes! = comptes.remove(compteAsupprimer)
+	assert
+		#comptes' = #comptes -1;
 	//end-supprimerCompte
 
 	schema !viderCompteFerme(compteAvider: NumCompte)
@@ -312,12 +324,16 @@ interface
 	pre
 		dateJour = dateBilan,
 		dateBilan.annee <20000,
-		(+ over (for i::comptes.dom yield comptes[i].solde)) = soldeGlobal
+		(+ over (for i::comptes.dom yield comptes[i].solde)) = soldeGlobal,
+		forall x::comptes.ran :- x.depot_liquide_cet_exercice < maxDepotLiquideParExercice
 	post
 		dateBilan! = Date{dateBilan.jour, dateBilan.mois, dateBilan.annee + 1},
 		soldeVerification! = soldeGlobal,
 		entreesEffectues! = 0,
-		sortiesEffectues! = 0;
+		sortiesEffectues! = 0,
+		forall x::comptes.dom :- comptes[x]!changer_depotLiquide(0);
+	//assert
+	//	forall x::comptes'.ran :- x.depot_liquide_cet_exercice = 0;
 	//end-verifierBilan
 
 	schema !virerInterBanques(numeroCompte: NumCompte, montant: nat)

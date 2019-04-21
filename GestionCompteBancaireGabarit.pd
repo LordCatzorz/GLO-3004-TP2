@@ -314,6 +314,7 @@ interface
 		#comptes' = #comptes,
 		compteOuDeposer in comptes'.dom,
 		comptes'[compteOuDeposer].solde = comptes[compteOuDeposer].solde + montant,
+		comptes'[compteOuDeposer].depot_liquide_cet_exercice = comptes[compteOuDeposer].depot_liquide_cet_exercice,
 		soldeVerification' = soldeVerification,
 		sortiesEffectues' = sortiesEffectues,
 		gain' = gain,
@@ -328,19 +329,42 @@ interface
 	post
 		entreesEffectues! = entreesEffectues + montant,
 		soldeGlobal! = soldeGlobal + montant,
-		comptes[compteOuDeposer]!deposerLiquide(montant);
+		comptes[compteOuDeposer]!deposerLiquide(montant)
+	assert
+		#comptes' = #comptes,
+		compteOuDeposer in comptes'.dom,
+		comptes'[compteOuDeposer].solde = comptes[compteOuDeposer].solde + montant,
+		comptes'[compteOuDeposer].depot_liquide_cet_exercice = comptes[compteOuDeposer].depot_liquide_cet_exercice + montant,
+		soldeVerification' = soldeVerification,
+		sortiesEffectues' = sortiesEffectues,
+		gain' = gain,
+		dateBilan' = dateBilan;
 	//end-deposerLiquideDansCompte
 
 	schema !virerEntreCompte(compteOrigine: NumCompte, compteDestination: NumCompte, montant: nat)
 	pre
 		compteOrigine in comptes.dom,
 		compteDestination in comptes.dom,
+		compteOrigine ~= compteDestination,
 		comptes[compteOrigine].date_fermeture within void,
 		comptes[compteDestination].date_fermeture within void,
 		comptes[compteOrigine].solde - montant >= partQualification
 	post
 		!retirerDuCompte(compteOrigine, montant) then
-		!deposerDansCompte(compteDestination, montant);
+		!deposerDansCompte(compteDestination, montant)
+	assert
+		#comptes' = #comptes,
+		compteDestination in comptes'.dom,
+		comptes'[compteDestination].solde = comptes[compteDestination].solde + montant,
+		comptes'[compteDestination].depot_liquide_cet_exercice = comptes[compteDestination].depot_liquide_cet_exercice,
+		compteOrigine in comptes'.dom,
+		comptes'[compteOrigine].solde = comptes[compteOrigine].solde - montant,
+		soldeGlobal' = soldeGlobal,
+		soldeVerification' = soldeVerification,
+		entreesEffectues' = entreesEffectues + montant,
+		sortiesEffectues' = sortiesEffectues + montant,
+		gain' = gain,
+		dateBilan' = dateBilan;
 	//end-virerEntreCompte
 
 	schema !changer_NIP(numeroCompte: NumCompte, nouveauNIP: int)
@@ -348,7 +372,17 @@ interface
 		numeroCompte in comptes.dom,
 		nouveauNIP ~= comptes[numeroCompte].nip
 	post
-		comptes[numeroCompte]!modifierNIP(nouveauNIP);
+		comptes[numeroCompte]!modifierNIP(nouveauNIP)
+	assert
+		#comptes' = #comptes,
+		numeroCompte in comptes'.dom,
+		comptes'[numeroCompte].nip = nouveauNIP,
+		soldeGlobal' = soldeGlobal,
+		soldeVerification' = soldeVerification,
+		entreesEffectues' = entreesEffectues,
+		sortiesEffectues' = sortiesEffectues,
+		gain' = gain,
+		dateBilan' = dateBilan;
 	//end-changer_NIP
 
 	schema !verifierBilan(dateJour: Date)
